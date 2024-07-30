@@ -2,8 +2,8 @@ package com.james_storr.company_search.service;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.james_storr.company_search.model.truNarrative.TruProxyResponse;
+import com.james_storr.company_search.model.SearchResponse;
 
 public interface SearchService {
-     CompletableFuture<TruProxyResponse> getCompanyByNameOrID(String query, String company_id);
+     CompletableFuture<SearchResponse> getCompanyByNameOrID(String query, String company_id);
 }

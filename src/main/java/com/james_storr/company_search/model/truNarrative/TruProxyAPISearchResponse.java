@@ -5,7 +5,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class TruProxyResponse {   
+public class TruProxyAPISearchResponse {   
     private String total_results;
-    private List<Item> items;
+    private List<SearchItem> items;
 }

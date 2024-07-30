@@ -9,7 +9,8 @@ import com.james_storr.company_search.service.SearchServiceImpl;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
@@ -22,9 +23,9 @@ public class SearchController {
         this.searchService = searchService;
     }
 
-    @GetMapping("/company")
-    public CompletableFuture<ResponseEntity<?>> getCompanyByNameOrID(SearchRequest request) {        
-        return searchService.getCompanyByNameOrID(request.getCompanyname(), request.getCompanyNumber()).thenApply(ResponseEntity::ok);
+    @PostMapping("/company")
+    public CompletableFuture<ResponseEntity<?>> getCompanyByNameOrID(@RequestBody SearchRequest request) {        
+        return searchService.getCompanyByNameOrID(request.getCompanyName(), request.getCompanyNumber()).thenApply(ResponseEntity::ok);
     }
 
 }

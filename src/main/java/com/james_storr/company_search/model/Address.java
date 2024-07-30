@@ -1,4 +1,4 @@
-package com.james_storr.company_search.model.truNarrative;
+package com.james_storr.company_search.model;
 
 import lombok.Data;
 

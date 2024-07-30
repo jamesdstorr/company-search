@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Ignore application properties so API Key not uploaded to REPO
+application.properties

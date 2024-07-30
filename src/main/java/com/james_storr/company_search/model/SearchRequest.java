@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class SearchRequest {
-    private String companyname;
+    private String companyName;
     private String companyNumber;
 }
