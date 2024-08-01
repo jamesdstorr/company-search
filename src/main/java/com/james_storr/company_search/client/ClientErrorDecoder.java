@@ -7,8 +7,7 @@ import com.james_storr.company_search.exception.NotFoundException;
 
 import feign.Response;
 
-public class ClientErrorDecoder implements ErrorDecoder {
-    private final ErrorDecoder defaultErrorDecoder = new Default();
+public class ClientErrorDecoder implements ErrorDecoder { 
 
     @Override
     public Exception decode(String methodKey, Response response) {

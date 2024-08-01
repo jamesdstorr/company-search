@@ -11,11 +11,10 @@ import com.james_storr.company_search.exception.GenericFeignException;
 import com.james_storr.company_search.exception.NotFoundException;
 import com.james_storr.company_search.hook.annotations.FetchCompanyDataHooks;
 import com.james_storr.company_search.hook.context.CompanySearchContext;
+import com.james_storr.company_search.model.Company;
 import com.james_storr.company_search.model.SearchResponse;
 import com.james_storr.company_search.model.truNarrative.TruProxyAPIOfficersResponse;
 import com.james_storr.company_search.repository.CompanyRepository;
-
-import feign.FeignException;
 
 @FetchCompanyDataHooks
 @Component
@@ -36,30 +35,8 @@ public class FetchDataHookImpl implements CompanySearchHook<CompanySearchContext
     public CompletableFuture<CompanySearchContext> beforeProcessing(CompanySearchContext ctx) {
 
         return CompletableFuture.supplyAsync(() -> {
-
-            if (ctx.getCompanyNumber() != null) {
-                ctx.setSearchResponse(
-                        SearchResponse.builder().items(companyRepository.findByCompanyNumber(ctx.getCompanyNumber()))
-                                .total_results("1").build());
-            }
-
-            if (ctx.getSearchResponse() == null || ctx.getSearchResponse().getItems().isEmpty()) {
-                try {
-                    if (ctx.getCompanyNumber() != null) {
-                        ctx.setSearchResponse(truProxyAPI.search(apiKey, ctx.getCompanyNumber()));
-                    } else {
-                        ctx.setSearchResponse(truProxyAPI.search(apiKey, ctx.getCompanyName()));
-                    }
-                } catch (NotFoundException e) {
-                    
-                        throw new NotFoundException("No Company can be found");
-                    
-                }
-                catch (GenericFeignException e) {
-                    // Handle other Feign exceptions
-                    throw new RuntimeException("Feign client error: " + e.getMessage(), e);
-                }
-            }
+            if (loadCompanyFromRepository(ctx)) return ctx;
+            loadCompanyFromAPI(ctx);
             return ctx;
         });
     }
@@ -67,27 +44,52 @@ public class FetchDataHookImpl implements CompanySearchHook<CompanySearchContext
     @Override
     public CompletableFuture<CompanySearchContext> afterProcessing(CompanySearchContext ctx) {
         return CompletableFuture.supplyAsync(() -> {
-            ctx.getSearchResponse().getItems().stream()
-                    .forEach(item -> {
-                        if (item.getOfficers() == null || item.getOfficers().isEmpty()) {
-                            TruProxyAPIOfficersResponse officersResponse = truProxyAPI.officers(apiKey,
-                                    item.getCompanyNumber());
-                            if (officersResponse.getItems() != null) {
-                                item.setOfficers(officersResponse.getItems().stream()
-                                        .filter(officer -> officer.getResigned_on() == null)
-                                        .collect(Collectors.toList()));
-                            }
-                        }
-                        SaveToDatabase(ctx);
-                    });
-
+            ctx.getSearchResponse().getItems().forEach(item -> {
+                if (item.getOfficers() == null || item.getOfficers().isEmpty()) {
+                    loadOfficersFromAPI(item);
+                }
+                saveToDatabase(ctx);
+            });
             return ctx;
         });
-
     }
 
-    private void SaveToDatabase(CompanySearchContext ctx) {
+    private void saveToDatabase(CompanySearchContext ctx) {
         companyRepository.saveAll(ctx.getSearchResponse().getItems());
     }
 
+
+
+    private boolean loadCompanyFromRepository(CompanySearchContext ctx) {
+        if (ctx.getCompanyNumber() != null) {
+            ctx.setSearchResponse(SearchResponse.builder()
+                .items(companyRepository.findByCompanyNumber(ctx.getCompanyNumber()))
+                .total_results("1").build());
+            return true;
+        }
+        return false;
+    }
+
+    private void loadCompanyFromAPI(CompanySearchContext ctx) {
+        try {
+            if (ctx.getCompanyNumber() != null) {
+                ctx.setSearchResponse(truProxyAPI.search(apiKey, ctx.getCompanyNumber()));
+            } else {
+                ctx.setSearchResponse(truProxyAPI.search(apiKey, ctx.getCompanyName()));
+            }
+        } catch (NotFoundException e) {
+            throw new NotFoundException("No Company can be found");
+        } catch (GenericFeignException e) {
+            throw new RuntimeException("Feign client error: " + e.getMessage(), e);
+        }
+    }
+
+    private void loadOfficersFromAPI(Company item) {
+        TruProxyAPIOfficersResponse officersResponse = truProxyAPI.officers(apiKey, item.getCompanyNumber());
+        if (officersResponse.getItems() != null) {
+            item.setOfficers(officersResponse.getItems().stream()
+                .filter(officer -> officer.getResigned_on() == null)
+                .collect(Collectors.toList()));
+        }
+    }
 }
