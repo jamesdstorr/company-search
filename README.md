@@ -29,3 +29,7 @@ The Company Search Service is a Spring Boot application designed to search and r
 - Maven 3.6.3 or higher
 - MongoDB
 
+### Application Properties
+- Add API Key for TryProxyAPI 
+
+
