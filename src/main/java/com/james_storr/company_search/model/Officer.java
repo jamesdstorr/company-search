@@ -2,9 +2,11 @@ package com.james_storr.company_search.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class Officer {
     private String name;
     private String officer_role;

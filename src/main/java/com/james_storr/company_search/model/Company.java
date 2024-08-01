@@ -6,10 +6,11 @@ import org.springframework.data.annotation.Id;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class Company {
     @Id
     @JsonProperty("company_number")

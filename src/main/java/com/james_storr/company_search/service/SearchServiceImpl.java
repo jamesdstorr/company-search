@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.stereotype.Service;
 
-import com.james_storr.company_search.client.TruProxyAPI;
+
 import com.james_storr.company_search.hook.CompanySearchHook;
 import com.james_storr.company_search.hook.CompanySearchHookEnum;
 import com.james_storr.company_search.hook.context.CompanySearchContext;
@@ -20,8 +20,7 @@ public class SearchServiceImpl implements SearchService {
   
     private final CompanySearchHook<CompanySearchContext> fetchCompanyDataHook;
 
-    public SearchServiceImpl(TruProxyAPI truProxy, 
-            Map<CompanySearchHookEnum, CompanySearchHook<CompanySearchContext>> companySearchHookMap){
+    public SearchServiceImpl(Map<CompanySearchHookEnum, CompanySearchHook<CompanySearchContext>> companySearchHookMap){
  
         this.fetchCompanyDataHook = companySearchHookMap.get(CompanySearchHookEnum.FETCH_COMPANY_DATA);
     }
